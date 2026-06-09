@@ -62,12 +62,12 @@ cd mdfox
 
 ```bash
 # Add the MDFox GitHub repo
-git remote add mdfox https://github.com/GrounzerLiu/mdfox.git
-git fetch mdfox md-ui-clean
+git remote add github https://github.com/GrounzerLiu/mdfox.git
+git fetch github md-ui-clean
 
 # Create a branch from your current commit (so we know where we are)
 git checkout -b md-ui-clean
-git reset --hard mdfox/md-ui-clean
+git reset --hard github/md-ui-clean
 ```
 
 Now the custom files are applied on top of the full mozilla-central codebase.
@@ -146,7 +146,7 @@ git rebase branches/default/tip
 # Resolve conflicts if any, then:
 git add .
 git rebase --continue
-git push mdfox md-ui-clean --force
+git push github md-ui-clean --force
 ```
 
 ---
