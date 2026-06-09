@@ -51,24 +51,26 @@ sudo apt install \
 
 ## Setup
 
-### 1. Clone from GitHub
+### 1. Clone mozilla-central
 
 ```bash
-git clone https://github.com/GrounzerLiu/mdfox.git
+git clone --depth=1 hg::https://hg.mozilla.org/mozilla-central/ mdfox
 cd mdfox
-git checkout md-ui
 ```
 
-> `md-ui` branch contains only the custom changes. The base mozilla-central code is fetched via git-cinnabar (see step 2).
-
-### 2. Add upstream (mozilla-central)
+### 2. Apply MDFox custom changes
 
 ```bash
-# Add hg upstream for sync and artifact builds
-git remote add upstream hg::https://hg.mozilla.org/mozilla-central/
-git fetch upstream branches/default/tip
-git branch branches/default/tip upstream/branches/default/tip
+# Add the MDFox GitHub repo
+git remote add mdfox https://github.com/GrounzerLiu/mdfox.git
+git fetch mdfox md-ui-clean
+
+# Create a branch from your current commit (so we know where we are)
+git checkout -b md-ui-clean
+git reset --hard mdfox/md-ui-clean
 ```
+
+Now the custom files are applied on top of the full mozilla-central codebase.
 
 ### 3. Create .mozconfig
 
@@ -134,14 +136,17 @@ adb -s <device-id> install -r path/to/fenix-arm64-v8a-debug.apk
 ## Sync with upstream
 
 ```bash
+# Make sure you're on the upstream branch first
 git checkout branches/default/tip
-git pull upstream branches/default/tip
-git checkout md-ui
+git pull origin branches/default/tip
+
+# Switch back to your custom branch and rebase
+git checkout md-ui-clean
 git rebase branches/default/tip
 # Resolve conflicts if any, then:
 git add .
 git rebase --continue
-git push github md-ui --force
+git push mdfox md-ui-clean --force
 ```
 
 ---
