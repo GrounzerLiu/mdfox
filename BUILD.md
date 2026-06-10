@@ -124,11 +124,39 @@ Architecture variants: `arm64-v8a`, `armeabi-v7a`, `x86_64`.
 
 ---
 
+## Development workflow
+
+Because `md-ui-clean` is an orphan branch (only contains your changes), daily development requires switching between branches:
+
+```bash
+# 1. Switch to the full codebase to make changes and build
+git checkout branches/default/tip
+
+# ... edit code, run ./mach build / ./mach gradle :fenix:assembleDebug ...
+
+# 2. After testing, switch back to your custom branch
+git checkout md-ui-clean
+
+# 3. Copy your changed files from the full tree
+git checkout branches/default/tip -- mobile/android/fenix/app/build.gradle
+git checkout branches/default/tip -- mobile/android/fenix/app/src/main/res/values/static_strings.xml
+# Add any other files you modified
+
+# 4. Commit and push
+git commit -m "你的修改描述"
+git push github md-ui-clean --force
+
+# 5. Switch back to branches/default/tip to continue working
+git checkout branches/default/tip
+```
+
+> **Tip**: Use `git status` after switching to see what files you changed.
+
 ## Install
 
 ```bash
 adb devices
-adb -s <device-id> install -r path/to/fenix-arm64-v8a-debug.apk
+adb -s <device-id> install -r objdir-android/gradle/build/mobile/android/fenix/app/outputs/apk/debug/fenix-arm64-v8a-debug.apk
 ```
 
 ---
