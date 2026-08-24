@@ -179,6 +179,54 @@ git push github md-ui-clean --force
 
 ---
 
+## 指定上游版本 (Pin upstream version)
+
+MDFox 的自定义文件（`build.gradle`、`static_strings.xml`）与 mozilla-central 版本**强绑定**。上游更新可能导致插件体系、资源结构变化，需要重新适配后才能编译。
+
+### 当前固定版本
+
+| 项 | 值 |
+| --- | --- |
+| 仓库 | `mozilla-central`（nightly） |
+| Commit | `092b4be38e4fa`（2026-08-24） |
+| 版本 | Firefox 156.0a1 / GeckoView 156.0 |
+| 状态 | 已验证可编译（MDFox APK 构建成功） |
+
+日常开发**不要随意 `pull` 上游**，保持固定在已验证的 commit。需要升级时按下面流程操作并重新检查适配点。
+
+### 可选的上游版本线
+
+| 版本线 | 仓库 URL | 特点 |
+| --- | --- | --- |
+| Nightly（现状） | `hg::https://hg.mozilla.org/mozilla-central/` | 每天更新，跟随最新 |
+| Beta | `hg::https://hg.mozilla.org/releases/mozilla-beta/` | 版本号固定，每周更新 |
+| Release | `hg::https://hg.mozilla.org/releases/mozilla-release/` | 正式版，几周更新一次 |
+| ESR | `hg::https://hg.mozilla.org/releases/mozilla-esr140/` | 长期支持，一年一版，最稳定 |
+
+### 切换版本线
+
+```bash
+# 方式一：用目标版本线重新 clone（推荐，干净）
+git clone --depth=1 hg::https://hg.mozilla.org/releases/mozilla-release/ mdfox
+cd mdfox
+git remote add github https://github.com/GrounzerLiu/mdfox.git
+git fetch github md-ui-clean
+git checkout github/md-ui-clean -- .gitignore BUILD.md CONTRIBUTING.md mobile/android/fenix/app/build.gradle mobile/android/fenix/app/src/main/res/values/static_strings.xml
+
+# 方式二：在现有仓库添加版本线 remote 并拉取
+git remote add release hg::https://hg.mozilla.org/releases/mozilla-release/
+git fetch --depth=1 release
+```
+
+### 升级/切换后需要检查的适配点
+
+1. **build.gradle 插件体系**：`libs.plugins.*` 别名（如 `kotlin.android`）、AGP/Kotlin 版本是否与当前树匹配
+2. **static_strings.xml 资源重复**：上游会把字符串在 `strings.xml` 与 `static_strings.xml` 之间挪动，合并时注意 Duplicate resources 错误
+3. **SDK/NDK 版本**：`.mozconfig` 的 `--target` 与 SDK/NDK 要求（可在 `python/mozboot/mozboot/android.py` 查看 `NDK_VERSION`）
+4. **artifact 保质期**：预编译 GeckoView 只保留几个月。固定版本太久后 `./mach build` 会因 artifact 过期失败，届时升级到新 commit 或改做完整构建（去掉 `--enable-artifact-builds`）
+
+---
+
 ## Project structure
 
 ```
